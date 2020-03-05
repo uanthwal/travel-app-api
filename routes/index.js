@@ -6,7 +6,7 @@ var UserSession = require("../models/usersession");
 var nodemailer = require("nodemailer");
 var http = require("http");
 const fetch = require("node-fetch");
-import { v1 as uuidv1 } from "uuid";
+const uuidv1 = require('uuid/v1');
 
 router.post("/register", function(req, res, next) {
   console.log(req.body);
@@ -60,16 +60,18 @@ router.post("/register", function(req, res, next) {
 });
 
 router.post("/verify-otp", function(req, res, next) {
-  console.log(req);
+  // console.log(req);
   var req_data = req.body;
   TwoFactorAuth.findOne({ email: req_data.email }, function(err, data) {
     if (data) {
       if (data.otp == req_data.otp) {
+        console.log("OTP Matched")
         TwoFactorAuth.deleteOne({ email: data.email }, function(err, data) {
           if (err) console.log(err);
           else console.log("OTP removed for user: " + data.email);
         });
         var session_id = uuidv1();
+        console.log(session_id);
         var userSession = new UserSession({
           email: req_data.email,
           session_id: session_id
@@ -105,27 +107,6 @@ router.post("/verify-otp", function(req, res, next) {
       res.send({
         code: "205",
         message: "No entry for OTP in records."
-      });
-    }
-  });
-
-  transporter.sendMail(mailOptions, function(error, info) {
-    if (error) {
-      console.log(error);
-    } else {
-      console.log("Email sent: " + info.response);
-
-      var twoFactAuth = new TwoFactorAuth({
-        email: data.email,
-        otp: data.otp
-      });
-      twoFactAuth.save(function(err, Person) {
-        if (err) console.log(err);
-        else console.log("OTP saved for user:" + data.email);
-      });
-      res.send({
-        code: "200",
-        message: "OTP has been successfully sent to the registered email."
       });
     }
   });
