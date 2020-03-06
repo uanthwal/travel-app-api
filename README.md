@@ -1,6 +1,4 @@
-# Node.js-Register-Login-App
-
-This is a user login and registration app using Node.js, Express, Mongoose and express-sessions.
+Dal5409
 
 ## Getting Started
 
