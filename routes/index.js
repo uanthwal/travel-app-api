@@ -3,10 +3,11 @@ var router = express.Router();
 var User = require("../models/user");
 var TwoFactorAuth = require("../models/twofactor");
 var UserSession = require("../models/usersession");
+var SearchHit = require("../models/search");
+var Places = require("../models/places");
 var nodemailer = require("nodemailer");
-var http = require("http");
 const fetch = require("node-fetch");
-const uuidv1 = require('uuid/v1');
+const uuidv1 = require("uuid/v1");
 
 router.post("/register", function(req, res, next) {
   console.log(req.body);
@@ -60,12 +61,11 @@ router.post("/register", function(req, res, next) {
 });
 
 router.post("/verify-otp", function(req, res, next) {
-  // console.log(req);
   var req_data = req.body;
   TwoFactorAuth.findOne({ email: req_data.email }, function(err, data) {
     if (data) {
       if (data.otp == req_data.otp) {
-        console.log("OTP Matched")
+        console.log("OTP Matched");
         TwoFactorAuth.deleteOne({ email: data.email }, function(err, data) {
           if (err) console.log(err);
           else console.log("OTP removed for user: " + data.email);
@@ -150,7 +150,8 @@ router.post("/send-otp", function(req, res, next) {
       twoFactAuth.save(function(err, Person) {
         if (err) console.log(err);
         else console.log("OTP saved for user:" + data.email);
-      });j
+      });
+      j;
       res.send({
         code: "200",
         message: "OTP has been successfully sent to the registered email."
@@ -194,61 +195,75 @@ router.post("/login", function(req, res, next) {
   });
 });
 
-router.get("/profile", function(req, res, next) {
-  console.log("profile");
-  User.findOne({ unique_id: req.session.userId }, function(err, data) {
-    console.log("data");
+router.post("/search", function(req, res, next) {
+  var search_text = req.body.search_text;
+  var s_id = req.body.session_id;
+  var resp_data = [];
+
+  Places.find({ $text: { $search: search_text } }, function(err, data) {
     console.log(data);
-    if (!data) {
-      res.redirect("/");
+    resp_data = data;
+    console.log("after query");
+    UserSession.findOne({ session_id: s_id }, function(err, data) {
+      if (data) {
+        var newSearchHit = new SearchHit({
+          email: data.email,
+          search_text: search_text
+        });
+        newSearchHit.save(function(err, Person) {
+          if (err) console.log(err);
+          else console.log("Search hit saved");
+        });
+      }
+    });
+    res.send({
+      code: 200,
+      message: resp_data.length + " Result(s) Found",
+      data: resp_data
+    });
+  });
+});
+
+router.post("/logout", function(req, res, next) {
+  var s_id = req.body.session_id;
+  UserSession.findOne({ session_id: s_id }, function(err, data) {
+    if (data) {
+      UserSession.deleteOne({ email: data.email }, function(err, del_data) {
+        if (err) console.log(err);
+        else console.log("Session destroyed: " + data.email);
+      });
+      res.send({
+        code: 200,
+        message: "Session destroyed. Logout Successful."
+      });
     } else {
-      //console.log("found");
-      return res.render("data.ejs", { name: data.username, email: data.email });
+      res.send({
+        code: 200,
+        message: "No active session for user."
+      });
     }
   });
 });
 
-router.get("/logout", function(req, res, next) {
-  console.log("logout");
-  if (req.session) {
-    // delete session object
-    req.session.destroy(function(err) {
-      if (err) {
-        return next(err);
-      } else {
-        return res.redirect("/");
-      }
-    });
-  }
-});
-
-router.get("/forgetpass", function(req, res, next) {
-  res.render("forget.ejs");
-});
-
-router.post("/forgetpass", function(req, res, next) {
-  //console.log('req.body');
-  //console.log(req.body);
-  User.findOne({ email: req.body.email }, function(err, data) {
-    console.log(data);
-    if (!data) {
-      res.send({ Success: "This Email Is not regestered!" });
-    } else {
-      // res.send({"Success":"Success!"});
-      if (req.body.password == req.body.passwordConf) {
-        data.password = req.body.password;
-        data.passwordConf = req.body.passwordConf;
-
-        data.save(function(err, Person) {
-          if (err) console.log(err);
-          else console.log("Success");
-          res.send({ Success: "Password changed!" });
-        });
-      } else {
+router.post("/user-search-history", function(req, res, next) {
+  var s_id = req.body.session_id;
+  UserSession.findOne({ session_id: s_id }, function(err, data) {
+    var resp_data = [];
+    if (data) {
+      SearchHit.find({ email: data.email }, function(err, s_data) {
+        resp_data = s_data;
         res.send({
-          Success: "Password does not matched! Both Password should be same."
+          code: 200,
+          message: resp_data.length + " Result(s) Found",
+          data: resp_data
         });
-      }
+      });
+    } else {
+      res.send({
+        code: 200,
+        message: "No active session for user.",
+        data: resp_data
+      });
     }
   });
 });
