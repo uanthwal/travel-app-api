@@ -268,4 +268,46 @@ router.post("/user-search-history", function(req, res, next) {
   });
 });
 
+// travel_mode API
+
+var array=[]
+for (var i=350, t=355; i<t; i++) {
+  array.push(Math.floor(Math.random()*t))
+}
+
+source = "NS"
+destination = "NS"
+
+router.post("/modes", function(req, res, next){
+  
+  if(source == destination){
+
+    bus_price = array[0]
+    
+    response_object = res.send({
+          code: "200",
+          travel_mode: "Bus",
+          travel_price: bus_price
+        })
+  }      
+    // console.log(response_object)
+
+  else if(source != destination){
+
+    bus_price = array[0]
+    plane_price = bus_price*2.5
+
+    res.send({
+      code: "200",
+      travel_mode: "Plane",
+      travel_price: plane_price
+    })
+  }
+
+  else {
+    console.log("Error")
+  }  
+})
+
+
 module.exports = router;
