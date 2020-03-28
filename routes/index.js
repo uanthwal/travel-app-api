@@ -341,6 +341,7 @@ function get_company(mode) {
 router.post("/modes", function(req, res, next) {
   var source = req.body.src;
   var destination = req.body.dest;
+  console.log(get_user_data_by_session(req.body.session_id));
   if (!source || !destination) {
     res.send({
       code: "400",
@@ -425,5 +426,61 @@ router.post("/get-all-provinces", function(req, res, next) {
   });
 });
 
+function get_province_by_id(id) {
+  Provinces.findOne({ p_id: id }, function(err, data) {
+    if (err) {
+      return null;
+    } else {
+      console.log(data);
+      return data;
+    }
+  });
+}
+
+function get_place_by_id(id) {
+  Places.findOne({ place_id: id }, function(err, data) {
+    if (err) {
+      console.log("err: ", err);
+      return null;
+    } else {
+      console.log(data);
+      return data;
+    }
+  });
+}
+
+function get_user_data_by_session(session_id) {
+  UserSession.findOne({ session_id: session_id }, function(err, data) {
+    if (err) {
+      console.log("get_user_data_by_session err1: ", err);
+      return null;
+    } else {
+      console.log("Session: ", data);
+      User.findOne({ email: data.email }, function(err, user_data) {
+        if (err) {
+          console.log("get_user_data_by_mail err1: ", err);
+          return null;
+        } else {
+          let user_info = JSON.parse(JSON.stringify(user_data));
+          delete user_info['password'] ;
+          console.log("User data in session:", user_info);
+          return user_info;
+        }
+      });
+    }
+  });
+}
+
+function get_user_data_by_mail(mail_id) {
+  User.findOne({ email: mail_id }, function(err, data) {
+    if (err) {
+      console.log("get_user_data_by_mail err1: ", err);
+      return null;
+    } else {
+      console.log("User data:", data);
+      return data;
+    }
+  });
+}
 
 module.exports = router;
