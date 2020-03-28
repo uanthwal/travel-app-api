@@ -359,7 +359,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "bus",
-          mode_company: get_company(),
+          mode_company: get_company("bus"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -378,7 +378,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "bus",
-          mode_company: get_company(),
+          mode_company: get_company("bus"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -390,7 +390,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "flight",
-          mode_company: get_company(),
+          mode_company: get_company("flight"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "flight_" + i
@@ -424,5 +424,6 @@ router.post("/get-all-provinces", function(req, res, next) {
     }
   });
 });
+
 
 module.exports = router;
