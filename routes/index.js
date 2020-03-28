@@ -6,7 +6,7 @@ var UserSession = require("../models/usersession");
 var SearchHit = require("../models/search");
 var Places = require("../models/places");
 
-var Tourism = require ("../models/tourism_data");
+var Tourism = require("../models/tourism_data");
 
 var nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
@@ -271,65 +271,84 @@ router.post("/user-search-history", function(req, res, next) {
   });
 });
 
-// travel_mode API
-
-var array=[]
-for (var i=350, t=355; i<t; i++) {
-  array.push(Math.floor(Math.random()*t))
-}
-
-source = "NS"
-destination = "NS"
-
-router.post("/modes", function(req, res, next){
-  
-  if(source == destination){
-
-    bus_price = array[0]
-    
-    response_object = res.send({
-          code: "200",
-          travel_mode: "Bus",
-          travel_price: bus_price
-        })
-  }      
-    // console.log(response_object)
-
-  else if(source != destination){
-
-    bus_price = array[0]
-    plane_price = bus_price*2.5
-
+router.post("/modes", function(req, res, next) {
+  var source = req.body.src;
+  var destination = req.body.dest;
+  if (!source || !destination) {
     res.send({
-      code: "200",
-      travel_mode: "Plane",
-      travel_price: plane_price
-    })
+      code: "400",
+      data: [],
+      message: "Bad Request"
+    });
+  } else {
+    t = 355;
+    let bus_options = Math.floor(Math.random() * (4 - 1) + 1);
+    let modes_data = [];
+    if (source == destination) {
+      for (var i = 1; i <= bus_options; i++) {
+        // Bus fare ranging from 50$ to 100$
+        let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
+        modes_data.push({
+          mode: "bus",
+          currency: "$",
+          mode_fare: bus_fare + ".00",
+          mode_id: "bus_" + i
+        });
+      }
+      res.send({
+        code: "200",
+        message: "Travel options",
+        data: modes_data
+      });
+    } else if (source != destination) {
+      let flight_options = Math.floor(Math.random() * (4 - 1) + 1);
+      for (var i = 1; i <= bus_options; i++) {
+        // Bus fare ranging from 50$ to 100$
+        let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
+        modes_data.push({
+          mode: "bus",
+          currency: "$",
+          mode_fare: bus_fare + ".00",
+          mode_id: "bus_" + i
+        });
+      }
+      for (var i = 1; i <= flight_options; i++) {
+        let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
+        bus_fare = Math.floor(bus_fare * 2.5);
+        modes_data.push({
+          mode: "flight",
+          currency: "$",
+          mode_fare: bus_fare + ".00",
+          mode_id: "flight_" + i
+        });
+      }
+      res.send({
+        code: "200",
+        message: "Travel options",
+        data: modes_data
+      });
+    } else {
+      res.send({
+        code: "400",
+        data: [],
+        message: "Bad Request; Issue with source or destination"
+      });
+    }
   }
+});
 
-  else {
-    console.log("Error")
-  }  
-})
-
-
-
-router.post("/fetchAll", function(req, res, next){
-  // console.log("REACHED!");
-
-  Tourism.find({}, {"_id":0}, function(err, data){
-    if (data){
-      console.log(data)
-      status_code="{code: '200'}"
-      res.send(status_code+",\n"+data)
+router.post("/get-all-provinces", function(req, res, next) {
+  Tourism.find({}, { _id: 0 }, function(err, data) {
+    if (data) {
+      res.send({
+        code: 200,
+        data: data,
+        message: "All the provinces in Canada"
+      });
+    } else if (err) {
+      console.log("Error while fetching the data: " + err);
     }
-    else if (err){
-      console.log("Error while fetching the data: "+err)
-    }
-    else {
-      console.log("Invalid Request!")
-    }
-  })
-})
+  });
+});
 
 module.exports = router;
