@@ -5,6 +5,9 @@ var TwoFactorAuth = require("../models/twofactor");
 var UserSession = require("../models/usersession");
 var SearchHit = require("../models/search");
 var Places = require("../models/places");
+
+var Tourism = require ("../models/tourism_data");
+
 var nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 const uuidv1 = require("uuid/v1");
@@ -309,5 +312,24 @@ router.post("/modes", function(req, res, next){
   }  
 })
 
+
+
+router.post("/fetchAll", function(req, res, next){
+  // console.log("REACHED!");
+
+  Tourism.find({}, {"_id":0}, function(err, data){
+    if (data){
+      console.log(data)
+      status_code="{code: '200'}"
+      res.send(status_code+",\n"+data)
+    }
+    else if (err){
+      console.log("Error while fetching the data: "+err)
+    }
+    else {
+      console.log("Invalid Request!")
+    }
+  })
+})
 
 module.exports = router;

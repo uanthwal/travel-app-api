@@ -10,7 +10,7 @@ var cors = require("cors");
 
 app.use(cors());
 mongoose.connect(
-  "mongodb://upendra:mongo123@ds033047.mlab.com:33047/travel-app",
+  "mongodb://54.152.237.11:27017/Tourism_DB",
   { useMongoClient: true }
 );
 
