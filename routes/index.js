@@ -5,9 +5,7 @@ var TwoFactorAuth = require("../models/twofactor");
 var UserSession = require("../models/usersession");
 var SearchHit = require("../models/search");
 var Places = require("../models/places");
-
-var Tourism = require("../models/tourism_data");
-
+var Provinces = require("../models/provinces");
 var nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 const uuidv1 = require("uuid/v1");
@@ -206,7 +204,7 @@ router.post("/search", function(req, res, next) {
   Places.find({ $text: { $search: search_text } }, function(err, data) {
     console.log(data);
     resp_data = data;
-    console.log("after query");
+    console.log("after query", data);
     UserSession.findOne({ session_id: s_id }, function(err, data) {
       if (data) {
         var newSearchHit = new SearchHit({
@@ -271,6 +269,52 @@ router.post("/user-search-history", function(req, res, next) {
   });
 });
 
+
+function generate_mode_number() {
+  const upperCaseAlp = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z"
+  ];
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let number = upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
+    "" +
+    upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
+    "" +
+    upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
+    "-" +
+    numbers[Math.floor(Math.random() * (numbers.length - 0) + 0)] +
+    "" +
+    numbers[Math.floor(Math.random() * (numbers.length - 0) + 0)] +
+    "" +
+    numbers[Math.floor(Math.random() * (numbers.length - 0) + 0)];
+    return number;
+}
+
+
 router.post("/modes", function(req, res, next) {
   var source = req.body.src;
   var destination = req.body.dest;
@@ -282,6 +326,7 @@ router.post("/modes", function(req, res, next) {
     });
   } else {
     t = 355;
+
     let bus_options = Math.floor(Math.random() * (4 - 1) + 1);
     let modes_data = [];
     if (source == destination) {
@@ -289,6 +334,7 @@ router.post("/modes", function(req, res, next) {
         // Bus fare ranging from 50$ to 100$
         let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
         modes_data.push({
+          mode_number: generate_mode_number(),
           mode: "bus",
           currency: "$",
           mode_fare: bus_fare + ".00",
@@ -306,6 +352,7 @@ router.post("/modes", function(req, res, next) {
         // Bus fare ranging from 50$ to 100$
         let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
         modes_data.push({
+          mode_number: generate_mode_number(),
           mode: "bus",
           currency: "$",
           mode_fare: bus_fare + ".00",
@@ -316,6 +363,7 @@ router.post("/modes", function(req, res, next) {
         let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
         bus_fare = Math.floor(bus_fare * 2.5);
         modes_data.push({
+          mode_number: generate_mode_number(),
           mode: "flight",
           currency: "$",
           mode_fare: bus_fare + ".00",
@@ -338,7 +386,7 @@ router.post("/modes", function(req, res, next) {
 });
 
 router.post("/get-all-provinces", function(req, res, next) {
-  Tourism.find({}, { _id: 0 }, function(err, data) {
+  Provinces.find({}, { _id: 0 }, function(err, data) {
     if (data) {
       res.send({
         code: 200,

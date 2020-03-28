@@ -9,6 +9,6 @@ placesSchema = new Schema( {
     img_url: String,
 }),
 
-places = mongoose.model('Places', placesSchema);
+placesModel = mongoose.model('Places', placesSchema);
 
-module.exports = places;
+module.exports = placesModel;
