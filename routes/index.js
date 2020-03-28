@@ -426,31 +426,8 @@ router.post("/get-all-provinces", function(req, res, next) {
   });
 });
 
-function get_province_by_id(id) {
-  Provinces.findOne({ p_id: id }, function(err, data) {
-    if (err) {
-      return null;
-    } else {
-      console.log(data);
-      return data;
-    }
-  });
-}
-
-function get_place_by_id(id) {
-  Places.findOne({ place_id: id }, function(err, data) {
-    if (err) {
-      console.log("err: ", err);
-      return null;
-    } else {
-      console.log(data);
-      return data;
-    }
-  });
-}
-
-function get_user_data_by_session(session_id) {
-  UserSession.findOne({ session_id: session_id }, function(err, data) {
+router.post("/get-user-info-by-session", function(req, res, next) {
+  UserSession.findOne({ session_id: req.body.session_id }, function(err, data) {
     if (err) {
       console.log("get_user_data_by_session err1: ", err);
       return null;
@@ -462,25 +439,64 @@ function get_user_data_by_session(session_id) {
           return null;
         } else {
           let user_info = JSON.parse(JSON.stringify(user_data));
-          delete user_info['password'] ;
+          delete user_info["password"];
           console.log("User data in session:", user_info);
-          return user_info;
+          res.send({
+            code: 200,
+            data: user_info,
+            message: "User data from session fetched successfully!"
+          });
         }
       });
     }
   });
-}
+});
 
-function get_user_data_by_mail(mail_id) {
+router.post("/get-province-by-id", function(req, res, next) {
+  Provinces.findOne({ p_id: id }, function(err, data) {
+    if (err) {
+      return null;
+    } else {
+      console.log(data);
+      res.send({
+        code: 200,
+        data: data,
+        message: "Province data fetched successfully!"
+      });
+    }
+  });
+});
+
+router.post("/get-place-by-id", function(req, res, next) {
+  Places.findOne({ place_id: id }, function(err, data) {
+    if (err) {
+      console.log("err: ", err);
+      return null;
+    } else {
+      console.log(data);
+      res.send({
+        code: 200,
+        data: data,
+        message: "Place data fetched successfully!"
+      });
+    }
+  });
+});
+
+router.post("/get-user-data-by-email", function(req, res, next) {
   User.findOne({ email: mail_id }, function(err, data) {
     if (err) {
       console.log("get_user_data_by_mail err1: ", err);
       return null;
     } else {
       console.log("User data:", data);
-      return data;
+      res.send({
+        code: 200,
+        data: data,
+        message: "User data by email fetched successfully!"
+      });
     }
   });
-}
+});
 
 module.exports = router;
