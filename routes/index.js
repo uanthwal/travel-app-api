@@ -269,7 +269,6 @@ router.post("/user-search-history", function(req, res, next) {
   });
 });
 
-
 function generate_mode_number() {
   const upperCaseAlp = [
     "A",
@@ -300,7 +299,8 @@ function generate_mode_number() {
     "Z"
   ];
   const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  let number = upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
+  let number =
+    upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
     "" +
     upperCaseAlp[Math.floor(Math.random() * (upperCaseAlp.length - 0) + 0)] +
     "" +
@@ -311,9 +311,32 @@ function generate_mode_number() {
     numbers[Math.floor(Math.random() * (numbers.length - 0) + 0)] +
     "" +
     numbers[Math.floor(Math.random() * (numbers.length - 0) + 0)];
-    return number;
+  return number;
 }
 
+function get_company(mode) {
+  let flight_companies = [
+    "Jet Airways",
+    "Air Canada",
+    "United Airles",
+    "Air India"
+  ];
+  let bus_companies = [
+    "Greyhound Canada",
+    "Autobus Maheux Service",
+    "Coach Canada",
+    "DRL Coachlines Service"
+  ];
+  if (mode == "bus") {
+    return bus_companies[
+      Math.floor(Math.random() * (bus_companies.length - 0) + 0)
+    ];
+  } else {
+    return flight_companies[
+      Math.floor(Math.random() * (flight_companies.length - 0) + 0)
+    ];
+  }
+}
 
 router.post("/modes", function(req, res, next) {
   var source = req.body.src;
@@ -336,6 +359,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "bus",
+          mode_company: get_company(),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -354,6 +378,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "bus",
+          mode_company: get_company(),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -365,6 +390,7 @@ router.post("/modes", function(req, res, next) {
         modes_data.push({
           mode_number: generate_mode_number(),
           mode: "flight",
+          mode_company: get_company(),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "flight_" + i
