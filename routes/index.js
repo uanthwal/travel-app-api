@@ -509,11 +509,12 @@ router.post("/api/book-ticket", function(req, res, next) {
     mode_fare: req.body.mode_fare,
     mode_number: req.body.mode_number,
     mode_id: req.body.mode_id,
-    date_of_travel: req.body.date_of_travel
+    date_of_travel: ""+req.body.date_of_travel
   });
   booking_info.save(function(err, data) {
     if (err) throw err;
     else {
+      console.log(data);
       res.send({
         code: 200,
         booking_id: data["_id"],
