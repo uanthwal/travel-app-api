@@ -6,7 +6,7 @@ var UserSession = require("../models/usersession");
 var SearchHit = require("../models/search");
 var Places = require("../models/places");
 var Provinces = require("../models/provinces");
-var Booking_History = require("../models/booking_history")
+var Booking_History = require("../models/booking_history");
 var nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 const uuidv1 = require("uuid/v1");
@@ -500,43 +500,30 @@ router.post("/api/get-user-data-by-email", function(req, res, next) {
   });
 });
 
-router.post("/booking_history", function(req, res, next){
-  username = req.body.username;
-  source = req.body.src;
-  destination = req.body.dest;
-  mode = req.body.mode;
-  mode_company = req.body.mode_company;
-  mode_fare = req.body.mode_fare;
-  mode_number = req.body.mode_number;
-  mode_id = req.body.mode_id;
-  date_of_travel = req.body.date_of_travel;
-
-  booking_history_data = [
-                          {username: username,
-                          source: source,
-                          destination: destination,
-                          mode: mode,
-                          mode_company: mode_company,
-                          mode_fare: mode_fare,
-                          mode_number: mode_number,
-                          mode_id: mode_id,
-                          date_of_travel: date_of_travel}
-                          ]
-
-  Booking_History.insertMany(booking_history_data);
-  Booking_History.find({}, {_id: 1}, function(err, data){
-
-    if(data){
+router.post("/api/booking-history", function(req, res, next) {
+  let booking_info = {
+    username: req.body.username,
+    src: req.body.src,
+    dest: req.body.dest,
+    mode: req.body.mode,
+    mode_company: req.body.mode_company,
+    mode_fare: req.body.mode_fare,
+    mode_number: req.body.mode_number,
+    mode_id: req.body.mode_id,
+    date_of_travel: req.body.date_of_travel
+  };
+  Booking_History.insert(booking_info);
+  Booking_History.find({}, { _id: 1 }, function(err, data) {
+    if (data) {
       res.send({
         code: 200,
-        booking_id: data
-      })
+        booking_id: data,
+        message: "Booking done for request"
+      });
+    } else if (err) {
+      console.log("Error while sending data: " + err);
     }
-    else if(err){
-      console.log("Error while sending data: "+ err)
-    }
-  })
+  });
 });
-
 
 module.exports = router;
