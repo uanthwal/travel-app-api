@@ -342,7 +342,6 @@ function get_company(mode) {
 router.post("/api/modes", function(req, res, next) {
   var source = req.body.src;
   var destination = req.body.dest;
-  console.log(get_user_data_by_session(req.body.session_id));
   if (!source || !destination) {
     res.send({
       code: "400",
@@ -517,10 +516,23 @@ router.post("/api/book-ticket", function(req, res, next) {
     else {
       res.send({
         code: 200,
-        booking_id: data['_id'],
+        booking_id: data["_id"],
         message: "Booking done for request"
       });
     }
+  });
+});
+
+router.post("/api/get-booking-by-id", function(req, res, next) {
+  var ObjectId = require("mongodb").ObjectId;
+  let booking_id = new ObjectId(req.body.booking_id);
+  Booking_History.find({ _id: booking_id }, function(err, data) {
+    if (err) throw err;
+    res.send({
+      code: 200,
+      data: data,
+      message: "Booking done for request"
+    });
   });
 });
 
