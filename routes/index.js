@@ -196,7 +196,7 @@ router.post("/login", function(req, res, next) {
   });
 });
 
-router.post("/search", function(req, res, next) {
+router.post("/api/search", function(req, res, next) {
   var search_text = req.body.search_text;
   var s_id = req.body.session_id;
   var resp_data = [];
@@ -225,7 +225,7 @@ router.post("/search", function(req, res, next) {
   });
 });
 
-router.post("/logout", function(req, res, next) {
+router.post("/api/logout", function(req, res, next) {
   var s_id = req.body.session_id;
   UserSession.findOne({ session_id: s_id }, function(err, data) {
     if (data) {
@@ -246,7 +246,7 @@ router.post("/logout", function(req, res, next) {
   });
 });
 
-router.post("/user-search-history", function(req, res, next) {
+router.post("/api/user-search-history", function(req, res, next) {
   var s_id = req.body.session_id;
   UserSession.findOne({ session_id: s_id }, function(err, data) {
     var resp_data = [];
@@ -338,7 +338,7 @@ function get_company(mode) {
   }
 }
 
-router.post("/modes", function(req, res, next) {
+router.post("/api/modes", function(req, res, next) {
   var source = req.body.src;
   var destination = req.body.dest;
   console.log(get_user_data_by_session(req.body.session_id));
@@ -412,7 +412,7 @@ router.post("/modes", function(req, res, next) {
   }
 });
 
-router.post("/get-all-provinces", function(req, res, next) {
+router.post("/api/get-all-provinces", function(req, res, next) {
   Provinces.find({}, { _id: 0 }, function(err, data) {
     if (data) {
       res.send({
@@ -426,7 +426,7 @@ router.post("/get-all-provinces", function(req, res, next) {
   });
 });
 
-router.post("/get-user-info-by-session", function(req, res, next) {
+router.post("/api/get-user-info-by-session", function(req, res, next) {
   UserSession.findOne({ session_id: req.body.session_id }, function(err, data) {
     if (err) {
       console.log("get_user_data_by_session err1: ", err);
@@ -452,7 +452,7 @@ router.post("/get-user-info-by-session", function(req, res, next) {
   });
 });
 
-router.post("/get-province-by-id", function(req, res, next) {
+router.post("/api/get-province-by-id", function(req, res, next) {
   Provinces.findOne({ p_id: id }, function(err, data) {
     if (err) {
       return null;
@@ -467,7 +467,7 @@ router.post("/get-province-by-id", function(req, res, next) {
   });
 });
 
-router.post("/get-place-by-id", function(req, res, next) {
+router.post("/api/get-place-by-id", function(req, res, next) {
   Places.findOne({ place_id: id }, function(err, data) {
     if (err) {
       console.log("err: ", err);
@@ -483,7 +483,7 @@ router.post("/get-place-by-id", function(req, res, next) {
   });
 });
 
-router.post("/get-user-data-by-email", function(req, res, next) {
+router.post("/api/get-user-data-by-email", function(req, res, next) {
   User.findOne({ email: mail_id }, function(err, data) {
     if (err) {
       console.log("get_user_data_by_mail err1: ", err);
