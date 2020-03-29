@@ -500,8 +500,8 @@ router.post("/api/get-user-data-by-email", function(req, res, next) {
   });
 });
 
-router.post("/api/booking-history", function(req, res, next) {
-  let booking_info = {
+router.post("/api/book-ticket", function(req, res, next) {
+  let booking_info = new Booking_History({
     username: req.body.username,
     src: req.body.src,
     dest: req.body.dest,
@@ -511,17 +511,15 @@ router.post("/api/booking-history", function(req, res, next) {
     mode_number: req.body.mode_number,
     mode_id: req.body.mode_id,
     date_of_travel: req.body.date_of_travel
-  };
-  Booking_History.insert(booking_info);
-  Booking_History.find({}, { _id: 1 }, function(err, data) {
-    if (data) {
+  });
+  booking_info.save(function(err, data) {
+    if (err) throw err;
+    else {
       res.send({
         code: 200,
-        booking_id: data,
+        booking_id: data['_id'],
         message: "Booking done for request"
       });
-    } else if (err) {
-      console.log("Error while sending data: " + err);
     }
   });
 });
