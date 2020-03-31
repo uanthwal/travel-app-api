@@ -8,10 +8,14 @@ var session = require("express-session");
 var MongoStore = require("connect-mongo")(session);
 var cors = require("cors");
 
+var MongoClient = require('mongodb').MongoClient,
+f = require('util').format,
+fs = require('fs');
 app.use(cors());
+
+
 mongoose.connect(
-  "mongodb://54.152.237.11:27017/Tourism_DB",
-  { useMongoClient: true }
+  'C_STR'
 );
 
 var db = mongoose.connection;

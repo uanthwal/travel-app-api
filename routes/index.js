@@ -19,8 +19,7 @@ router.post("/register", function(req, res, next) {
     !userInfo.email ||
     !userInfo.username ||
     !userInfo.password ||
-    !userInfo.dob ||
-    !userInfo.gender
+    !userInfo.mobile
   ) {
     res.send({ code: "400", message: "Bad Request" });
   } else {
@@ -40,8 +39,7 @@ router.post("/register", function(req, res, next) {
             email: userInfo.email,
             username: userInfo.username,
             password: userInfo.password,
-            gender: userInfo.gender,
-            dob: userInfo.dob
+            mobile: userInfo.mobile
           });
 
           newUser.save(function(err, Person) {
@@ -64,13 +62,24 @@ router.post("/register", function(req, res, next) {
 
 router.post("/verify-otp", function(req, res, next) {
   var req_data = req.body;
-  TwoFactorAuth.findOne({ email: req_data.email }, function(err, data) {
-    if (data) {
-      if (data.otp == req_data.otp) {
-        console.log("OTP Matched");
-        TwoFactorAuth.deleteOne({ email: data.email }, function(err, data) {
+  console.log("OTP Verification for user "+ req_data.email +" OTP: "+req_data.otp)
+  TwoFactorAuth.findOne({ email: req_data.email }, function(err, mainTfData) {
+    console.log("Data for user "+req_data.email+" in 2FA:", mainTfData);
+    if (mainTfData) {
+      console.log(parseInt(mainTfData.otp));
+      console.log(parseInt(req_data.otp));
+      console.log(parseInt(mainTfData.otp) === parseInt(req_data.otp));
+      if (parseInt(mainTfData.otp) === parseInt(req_data.otp)) {
+        console.log(
+          "OTP Matched, removing all OTP(s) for email: ",
+          req_data.email
+        );
+        TwoFactorAuth.deleteMany({ email: req_data.email }, function(
+          err,
+          tfdata
+        ) {
           if (err) console.log(err);
-          else console.log("OTP removed for user: " + data.email);
+          else console.log("OTP removed for user: " + req_data.email);
         });
         var session_id = uuidv1();
         console.log(session_id);
@@ -78,26 +87,42 @@ router.post("/verify-otp", function(req, res, next) {
           email: req_data.email,
           session_id: session_id
         });
-        UserSession.findOne({ email: req_data.email }, function(err, data) {
-          if (data) {
-            UserSession.deleteOne({ email: req_data.email }, function(
+        UserSession.find({ email: req_data.email }, function(err, usdata) {
+          if (usdata) {
+            console.log("Session found for user: " + req_data.email);
+            UserSession.deleteMany({ email: req_data.email }, function(
               err,
-              data
+              usddata
             ) {
               if (err) console.log(err);
-              else console.log("OTP removed for user: " + data.email);
+              else {
+                console.log("OTP removed for user: " + req_data.email);
+                userSession.save(function(err, Person) {
+                  if (err) console.log(err);
+                  else {
+                    console.log("New Session Created: " + req_data.email);
+                    res.send({
+                      code: "200",
+                      message: "OTP verified successfully.",
+                      session_id: session_id
+                    });
+                  }
+                });
+              }
+            });
+          } else {
+            userSession.save(function(err, Person) {
+              if (err) console.log(err);
+              else {
+                console.log("Session Created: " + req_data.email);
+                res.send({
+                  code: "200",
+                  message: "OTP verified successfully.",
+                  session_id: session_id
+                });
+              }
             });
           }
-          userSession.save(function(err, Person) {
-            if (err) console.log(err);
-            else console.log("Session Created: " + req_data.email);
-          });
-        });
-
-        res.send({
-          code: "200",
-          message: "OTP verified successfully.",
-          session_id: session_id
         });
       } else {
         res.send({
@@ -115,8 +140,7 @@ router.post("/verify-otp", function(req, res, next) {
 });
 
 router.post("/send-otp", function(req, res, next) {
-  console.log(req);
-  var data = req.body;
+  var req_data = req.body;
   var transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -124,45 +148,70 @@ router.post("/send-otp", function(req, res, next) {
       pass: "Dal@12345"
     }
   });
-
   var mailOptions = {
     from: "noreply@travel.com",
-    to: data.email,
+    to: req_data.email,
     subject: "travel app alert : One Time Password",
-    text: "Your One Time Password to access the Travel App is : " + data.otp
+    text: "Your One Time Password to access the Travel App is : " + req_data.otp
   };
-
   transporter.sendMail(mailOptions, function(error, info) {
     if (error) {
       console.log(error);
     } else {
       console.log("Email sent: " + info.response);
-      TwoFactorAuth.findOne({ email: data.email }, function(err, data) {
-        if (data) {
-          TwoFactorAuth.deleteOne({ email: data.email }, function(err, data) {
+      TwoFactorAuth.find({ email: req_data.email }, function(err, finddata) {
+        if (finddata) {
+          console.log("OTPs exists for user: ", req_data.email);
+          TwoFactorAuth.deleteMany({ email: req_data.email }, function(
+            err,
+            deletedata
+          ) {
             if (err) console.log(err);
-            else console.log("OTP removed for user: " + data.email);
+            else {
+              console.log("OTP removed for user: " + req_data.email);
+              var twoFactAuth = new TwoFactorAuth({
+                email: req_data.email,
+                otp: req_data.otp
+              });
+              twoFactAuth.save(function(err, Person) {
+                if (err) console.log(err);
+                else {
+                  console.log("New OTP saved for user: " + req_data.email);
+                  res.send({
+                    code: "200",
+                    message:
+                      "OTP has been successfully sent to the registered email."
+                  });
+                }
+              });
+            }
+          });
+        } else {
+          console.log("No OTPs for user: ", data.email);
+          var twoFactAuth = new TwoFactorAuth({
+            email: data.email,
+            otp: data.otp
+          });
+          twoFactAuth.save(function(err, Person) {
+            if (err) console.log(err);
+            else {
+              console.log("OTP saved for user:" + data.email);
+              res.send({
+                code: "200",
+                message:
+                  "OTP has been successfully sent to the registered email."
+              });
+            }
           });
         }
-      });
-      var twoFactAuth = new TwoFactorAuth({
-        email: data.email,
-        otp: data.otp
-      });
-      twoFactAuth.save(function(err, Person) {
-        if (err) console.log(err);
-        else console.log("OTP saved for user:" + data.email);
-      });
-      j;
-      res.send({
-        code: "200",
-        message: "OTP has been successfully sent to the registered email."
       });
     }
   });
 });
 
 router.post("/login", function(req, res, next) {
+  console.log(req.body.email);
+  console.log(req.body.password);
   User.findOne({ email: req.body.email }, function(err, data) {
     if (data) {
       if (data.password == req.body.password) {
@@ -192,6 +241,7 @@ router.post("/login", function(req, res, next) {
         res.send({ code: "202", message: "Invalid Credentials." });
       }
     } else {
+      console.log(err);
       res.send({ code: "203", message: "User not found" });
     }
   });
@@ -509,7 +559,7 @@ router.post("/api/book-ticket", function(req, res, next) {
     mode_fare: req.body.mode_fare,
     mode_number: req.body.mode_number,
     mode_id: req.body.mode_id,
-    date_of_travel: ""+req.body.date_of_travel
+    date_of_travel: "" + req.body.date_of_travel
   });
   booking_info.save(function(err, data) {
     if (err) throw err;
