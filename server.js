@@ -15,7 +15,7 @@ app.use(cors());
 
 
 mongoose.connect(
-  'C_STR'
+  'c_string'
 );
 
 var db = mongoose.connection;
