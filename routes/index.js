@@ -144,12 +144,12 @@ router.post("/send-otp", function(req, res, next) {
   var transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "dalcourselist@gmail.com",
-      pass: "Dal@12345"
+      user: "travelcanadacc@gmail.com",
+      pass: "CloudGroup14"
     }
   });
   var mailOptions = {
-    from: "noreply@travel.com",
+    from: "noreply@travelcanadacc.com",
     to: req_data.email,
     subject: "travel app alert : One Time Password",
     text: "Your One Time Password to access the Travel App is : " + req_data.otp
@@ -219,7 +219,7 @@ router.post("/login", function(req, res, next) {
           email: req.body.email,
           otp: Math.floor(100000 + Math.random() * 900000)
         };
-        url = "http://" + "localhost" + ":3000/send-otp";
+        url = "https://cloud-5409.herokuapp.com/send-otp";
         var headers = {
           "Content-Type": "application/json"
         };
@@ -367,7 +367,7 @@ function generate_mode_number() {
 
 function get_company(mode) {
   let flight_companies = [
-    "Jet Airways",
+    "Emirates",
     "Air Canada",
     "United Airles",
     "Air India"
@@ -378,7 +378,7 @@ function get_company(mode) {
     "Coach Canada",
     "DRL Coachlines Service"
   ];
-  if (mode == "bus") {
+  if (mode == "Bus") {
     return bus_companies[
       Math.floor(Math.random() * (bus_companies.length - 0) + 0)
     ];
@@ -409,8 +409,8 @@ router.post("/api/modes", function(req, res, next) {
         let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
         modes_data.push({
           mode_number: generate_mode_number(),
-          mode: "bus",
-          mode_company: get_company("bus"),
+          mode: "Bus",
+          mode_company: get_company("Bus"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -428,8 +428,8 @@ router.post("/api/modes", function(req, res, next) {
         let bus_fare = Math.floor(Math.random() * (100 - 50) + 50);
         modes_data.push({
           mode_number: generate_mode_number(),
-          mode: "bus",
-          mode_company: get_company("bus"),
+          mode: "Bus",
+          mode_company: get_company("Bus"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "bus_" + i
@@ -440,8 +440,8 @@ router.post("/api/modes", function(req, res, next) {
         bus_fare = Math.floor(bus_fare * 2.5);
         modes_data.push({
           mode_number: generate_mode_number(),
-          mode: "flight",
-          mode_company: get_company("flight"),
+          mode: "Flight",
+          mode_company: get_company("Flight"),
           currency: "$",
           mode_fare: bus_fare + ".00",
           mode_id: "flight_" + i
@@ -589,7 +589,6 @@ router.post("/api/get-booking-by-id", function(req, res, next) {
 
 router.post("/get-hotspots", function(req, res, next) {
   Booking_History.aggregate([ {"$group" : {_id:"$dest", count:{$sum:1}}}, {$sort: {"count":-1}} ], function(err, grpbydata) {
-    console.log(err);
     console.log(grpbydata);
     let res_data = [];
     for(let i = 0; i < 6; i++) {
@@ -604,7 +603,7 @@ router.post("/get-hotspots", function(req, res, next) {
             res.send({
               code: 200,
               data: res_data,
-              message: "Booking done for request"
+              message: "Trending places"
             });
           }
         }
