@@ -8,6 +8,8 @@ var session = require("express-session");
 var MongoStore = require("connect-mongo")(session);
 var cors = require("cors");
 
+var PDFDocument = require("pdfkit");
+
 var MongoClient = require('mongodb').MongoClient,
 f = require('util').format,
 fs = require('fs');
@@ -15,7 +17,7 @@ app.use(cors());
 
 
 mongoose.connect(
-  'C_STR'
+  'c_string'
 );
 
 var db = mongoose.connection;

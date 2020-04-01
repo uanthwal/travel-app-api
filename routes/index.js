@@ -10,13 +10,15 @@ var Booking_History = require("../models/booking_history");
 var nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 const uuidv1 = require("uuid/v1");
+const PDFDocument = require("pdfkit");
+const fs = require ("fs")
 
 router.post("/register", function(req, res, next) {
   console.log(req.body);
   var userInfo = req.body;
 
   if (
-    !userInfo.email ||
+    !userInfo.email ||  
     !userInfo.username ||
     !userInfo.password ||
     !userInfo.mobile
@@ -626,7 +628,7 @@ router.post("/api/ticket_generation", function(req, res, next){
   var flight_name = "West Jet"
   var flight_number = "(ROX - 218)"
 
-  doc = new PDFDocument;
+  var doc = new PDFDocument;
   doc.pipe(fs.createWriteStream("ticket.pdf"));
 doc.fontSize(14)
   .text('Your Booking Is Confirmed', 200, 90)
@@ -665,6 +667,6 @@ doc.fontSize(9)
   doc.end();
   res.send("OK")
 
-  })
+});
 
 module.exports = router;
